@@ -1,0 +1,131 @@
+!RANCID-CONTENT-TYPE: cisco
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname BB3
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable password cisco
+!
+no aaa new-model
+!
+clock timezone CET 1 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+ip auth-proxy max-login-attempts 5
+ip admission max-login-attempts 5
+!
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+crypto pki token default removal timeout 0
+!
+!
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback4
+ description EIGRP NETWORK
+ ip address 4.1.1.254 255.255.255.0
+!
+interface Loopback128
+ description EIGRP NETWORK
+ ip address 128.28.2.254 255.255.255.0 secondary
+ ip address 128.128.1.254 255.255.255.0
+!
+interface Loopback198
+ description EIGRP NETWORK
+ ip address 198.198.22.254 255.255.255.0 secondary
+ ip address 198.198.21.254 255.255.255.0 secondary
+ ip address 198.198.5.254 255.255.255.0 secondary
+ ip address 198.198.4.254 255.255.255.0 secondary
+ ip address 198.198.1.254 255.255.255.0 secondary
+ ip address 198.2.1.254 255.255.255.0 secondary
+ ip address 198.2.3.254 255.255.255.0 secondary
+ ip address 198.2.5.254 255.255.255.0 secondary
+ ip address 198.1.1.5 255.255.255.252
+!
+interface Ethernet0/0
+ description ### I AM BB3 ###
+ ip address 150.3.6.254 255.255.255.0
+!
+interface Ethernet0/1
+ no ip address
+ shutdown
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+!
+router eigrp 100
+ network 150.3.0.0
+ redistribute connected
+ auto-summary
+!
+ip forward-protocol nd
+!
+!
+ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 150.3.6.1
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ password cisco
+ login
+ transport input all
+!
+!
+end

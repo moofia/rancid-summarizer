@@ -1,0 +1,186 @@
+!RANCID-CONTENT-TYPE: cisco
+!
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname BB1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+clock timezone CET 1 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+ip auth-proxy max-login-attempts 5
+ip admission max-login-attempts 5
+!
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+crypto pki token default removal timeout 0
+!
+!
+archive
+ log config
+  hidekeys
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback197
+ description BGP Network
+ ip address 197.68.22.254 255.255.255.0 secondary
+ ip address 197.68.21.254 255.255.255.0 secondary
+ ip address 197.68.5.254 255.255.255.0 secondary
+ ip address 197.68.4.254 255.255.255.0 secondary
+ ip address 197.68.1.254 255.255.255.0
+!
+interface Loopback199
+ description RIP Networks
+ ip address 199.172.16.254 255.255.255.0 secondary
+ ip address 199.172.15.254 255.255.255.0 secondary
+ ip address 199.172.14.254 255.255.255.0 secondary
+ ip address 199.172.13.254 255.255.255.0 secondary
+ ip address 199.172.12.254 255.255.255.0 secondary
+ ip address 199.172.11.254 255.255.255.0 secondary
+ ip address 199.172.10.254 255.255.255.0 secondary
+ ip address 199.172.9.254 255.255.255.0 secondary
+ ip address 199.172.8.254 255.255.255.0 secondary
+ ip address 199.172.7.254 255.255.255.0 secondary
+ ip address 199.172.6.254 255.255.255.0 secondary
+ ip address 199.172.5.254 255.255.255.0 secondary
+ ip address 199.172.4.254 255.255.255.0 secondary
+ ip address 199.172.3.254 255.255.255.0 secondary
+ ip address 199.172.2.254 255.255.255.0 secondary
+ ip address 199.172.1.254 255.255.255.0
+!
+interface Ethernet0/0
+ description ### I AM BB1 ###
+ ip address 150.1.6.254 255.255.255.0
+!
+interface Ethernet0/1
+ no ip address
+ shutdown
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+router rip
+ version 2
+ network 150.1.0.0
+ network 150.100.0.0
+ network 199.172.1.0
+ network 199.172.2.0
+ network 199.172.3.0
+ network 199.172.4.0
+ network 199.172.5.0
+ network 199.172.6.0
+ network 199.172.7.0
+ network 199.172.8.0
+ network 199.172.9.0
+ network 199.172.10.0
+ network 199.172.11.0
+ network 199.172.12.0
+ network 199.172.13.0
+ network 199.172.14.0
+ network 199.172.15.0
+ network 199.172.16.0
+ no auto-summary
+!
+router bgp 254
+ bgp log-neighbor-changes
+ network 197.68.1.0
+ network 197.68.4.0
+ network 197.68.5.0
+ network 197.68.21.0
+ network 197.68.22.0
+ neighbor 150.1.6.1 remote-as 6
+ neighbor 150.1.6.1 send-community
+ neighbor 150.1.6.1 route-map ASPERP out
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 150.1.6.1
+!
+!
+ip prefix-list NET145 seq 5 permit 197.68.1.0/24
+ip prefix-list NET145 seq 10 permit 197.68.4.0/24
+ip prefix-list NET145 seq 15 permit 197.68.5.0/24
+!
+ip prefix-list NET2122 seq 5 permit 197.68.21.0/24
+ip prefix-list NET2122 seq 10 permit 197.68.22.0/24
+!
+route-map ASPERP permit 10
+ set as-path prepend 253
+ set community 254
+!
+route-map BGG permit 10
+ match ip address prefix-list NET145
+ set community 100 300 additive
+!
+route-map BGG permit 20
+ match ip address prefix-list NET2122
+ set community 100 200
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ password cisco
+ login
+ transport input all
+!
+!
+end

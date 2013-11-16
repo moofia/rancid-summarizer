@@ -1,0 +1,15 @@
+---
+settings:
+  # location of the checked out rancid repo
+  rancid_dir: /foo
+  # regex filter on device name
+  filter_default: .*
+  log_directory: /tmp
+  log_file: true
+  
+descriptions:
+  domain: 
+    - moo.net
+    - moofiaa.net
+  domain_strip: true
+  file: /tmp/c
