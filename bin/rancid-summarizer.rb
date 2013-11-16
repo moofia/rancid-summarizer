@@ -76,7 +76,7 @@ Dir.foreach(rancid_dir) do |directory|
           # must catch this error 
           # invalid byte sequence in UTF-8
           begin
-            line.chomp!.gsub!(/\s+$/,'')
+            line.chomp!
             line.gsub!(/\s+$/,'')
             @Device.line = line
             parse_interface          
