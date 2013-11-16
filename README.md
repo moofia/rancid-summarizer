@@ -1,8 +1,10 @@
-=RANCID Summarization Project=
+#RANCID Summarization Project
 
 At the moment only routes are supported, currently its the default.
 
-== routes ==
+[[_TOC_]]
+
+##routes
 
 Outputs all connected and static routes
 
@@ -33,7 +35,7 @@ connected route;bb1.moofia.net;Ethernet0/0;150.1.6.254;255.255.255.0
 static route;bb1.moofia.net;0.0.0.0/0.0.0.0 150.1.6.1
 ```
 
-== TODO / BUGS ==
+##TODO / BUGS
 
 * juniper issue with not all interfaces being picked up
 * juniper static routes not being picked up
