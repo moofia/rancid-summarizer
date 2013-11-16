@@ -1,8 +1,6 @@
-#RANCID Summarization Project
+#RANCID Summarization
 
 At the moment only routes are supported, currently its the default.
-
-[[_TOC_]]
 
 ##routes
 

@@ -1,12 +1,13 @@
 # Device class
 class Device
-  attr_writer :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes
-  attr_reader :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes
+  attr_writer :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups
+  attr_reader :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups
   
   def initialize(hostname, vendor)
     @interfaces = []
     @static_routes = []
     @trac = {}
+    @groups = {}
     @hostname = hostnameStripDomain(hostname)
     @vendor = vendor
     tracDefaults
@@ -48,6 +49,10 @@ class Device
     @trac["juniper"]     = {}
     @trac["juniper_vrf"] = 0
     @trac["inet"]        = ""
+    @trac["group_end_needed"] = false
+    @trac["group_start"] = false 
+    @trac["group_indent"] = -1
+    @trac["group_name_is_next"] = false
   end
 
 end # Class Device
@@ -129,13 +134,16 @@ end # Class Controller
 
 # Interface class
 class Interface
-  attr_writer :description, :encapsulation, :status, :name, :device, :vrf, :address, :netmask, :state, :vlan_tags, :connected_routes
-  attr_reader :mnemonic, :description, :telco, :speed_multiplier, :config_summary_done, :state, :valid, :name, :vlan_tags, :connected_routes
+  attr_writer :description, :encapsulation, :status, :name, :device, :vrf, :address, :netmask, :state, 
+  :vlan_tags, :connected_routes, :group
+  attr_reader :mnemonic, :description, :telco, :speed_multiplier, :config_summary_done, :state, :valid, :name, 
+  :vlan_tags, :connected_routes, :group
   
   def initialize(device, name)
     
     @name = name
     @DeviceName = device
+    @group = ""
     # mostly being done like this so i keep track of them, will clean up once i got a scope of the requirements
     @valid, @status, @encapsulation, @mnemonic, @descriptions, @is_valid_descriptions = false, "", "", "", "", false
     @telco, @circuit, @DeviceName, @config_summary_done, @vrf, @address, @netmask, @state,@l12type = "", "", "", false, "", "", "", "", ""

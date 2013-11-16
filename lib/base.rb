@@ -94,4 +94,6 @@ def processSummaries
     interface.connected_routes.to_routes_summary if $opt["mode"] == "routes"
   end
   @Device.summarizeStaticRoutes if $opt["mode"] == "routes"
+  
+  #debug @Device.groups
 end

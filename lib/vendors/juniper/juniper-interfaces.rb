@@ -8,7 +8,7 @@ def juniper_interface
   trac = @Device.trac
   rancid_file = @Device.rancid_file
   
-  # collect interfaces that are in a vrf, this is need to set the usage_class correctly
+  # collect interfaces that are in a vrf
    if trac["juniper_vrf"] == 0
      # must catch this error 
      # invalid byte sequence in UTF-8
@@ -30,6 +30,7 @@ def juniper_interface
      
    end
 
+
    # follow the indentation so we know where we are
    if trac["int_indent"]  >= 0
      trac["int_indent"] = trac["int_indent"] + 1 if line =~ /\{$/
@@ -38,8 +39,31 @@ def juniper_interface
    if trac["unit_indent"] >= 0
      trac["unit_indent"] = trac["unit_indent"] + 1 if line =~ /\{$/
      trac["unit_indent"] = trac["unit_indent"] - 1 if line =~ /\}$/
-   end           
-
+   end
+           
+   if trac["group_indent"]  >= 0
+     trac["group_indent"] = trac["group_indent"] + 1 if line =~ /\{$/
+     trac["group_indent"] = trac["group_indent"] - 1 if line =~ /\}$/
+   end   
+   
+   trac["group_current"] = "" if trac["group_indent"] < 0
+   
+   #groups {
+   #puts "#{trac["group_indent"]} #{@Device.line}"
+   # start of groups
+   if line =~ /^groups \{/
+     trac["group_indent"] = 0
+   end
+   
+   if trac["group_indent"] == 0
+     trac["group_name_is_next"] = true
+   end
+   
+   if trac["group_indent"] > 0 and trac["group_name_is_next"] 
+    trac["group_current"] = @Device.line.gsub(/\s{/,"").gsub(/^\s+/,'')
+    trac["group_name_is_next"] = false
+   end
+   
    # start of interfaces
    if line =~ /interfaces \{/
      trac["int_indent"] = 0
@@ -163,7 +187,7 @@ def juniper_interface
    #if trac["int_indent"] > 0
    # puts "indent:#{trac["int_indent"]} indent_unit:#{trac["unit_indent"]} #{line} ---> #{trac["physical_interface"]}:#{trac["unit"]} "
    #end
-   
+
    # deal with frame-relay or flexible-ethernet-services interfaces where the physical interface must be graphed. this might be extended to other
    # mediums as we are notified of this problem, eg broadlink etc
    # this is a bit of a kludge at the moment.
@@ -180,13 +204,11 @@ def juniper_interface
      if @Interface
        # TODO: is this check below really needed at this point ? 
        if @Interface.description =~ /\w+/
-                  
          @Interface.encapsulation = trac["encap"]
-         
-         
          if trac["encap"] =~ /flexible-ethernet-services|lacp/    
            @Interface.name.gsub!(/\.0$/,'') if trac["unit"] == ""
          end
+         @Interface.group = trac["group_current"]
          @Device.interfaces.push @Interface 
          @Interface = nil
        end
@@ -213,7 +235,10 @@ def juniper_interface
          end
        end
        # FIXME: why is a nil hitting this part
-       @Device.interfaces.push @Interface if @Interface != nil
+       if @Interface != nil
+         @Interface.group = trac["group_current"]
+         @Device.interfaces.push @Interface
+       end
        @Interface = nil
      end
      # clear trac
@@ -234,8 +259,8 @@ def juniper_interface
      trac["state"] = ""
      # this only being done for encap
      trac["encap"] = "" if trac["encap"] == "flexible-ethernet-services"
-     
    end
+   
    # end of indentation so we can process collected data
    if trac["int_indent"] == -1
      trac["physical_interface"] = ""
@@ -243,4 +268,23 @@ def juniper_interface
      trac["encap"] = ""
    end
   
+   # apply-groups
+   #apply-groups [CUSTOMER-EBV-ELECTRONIK 
+   #CUSTOMER-ENH002 CUSTOMER-CRESTA-GROUP MTNBUS-IRIS ];
+   
+   if trac["group_end_needed"]
+     @Device.line.gsub(/apply-groups \[ /,'').gsub(/ \];$/,'').split(" ").each do |g|
+       @Device.groups[g] = true
+     end
+     trac["group_end_needed"] = false if @Device.line =~ / \];$/
+   end
+   
+   if @Device.line =~ /^apply-groups/
+     @Device.line.gsub(/apply-groups \[ /,'').gsub(/ \]$/,'').split(" ").each do |g|
+       @Device.groups[g] = true
+     end
+          
+     trac["group_end_needed"] = true if @Device.line !~ / \];$/
+   end
+
 end
