@@ -6,9 +6,9 @@
 def juniper_routing(line,last,trac,rancid_file)
 
    # follow the indentation so we know where we are
-   if trac["int_indent"] >= 0
-     trac["int_indent"] = trac["int_indent"] + 1 if line =~ /\{$/
-     trac["int_indent"] = trac["int_indent"] - 1 if line =~ /\}$/
+   if trac["physical_interface_indent"] >= 0
+     trac["physical_interface_indent"] = trac["physical_interface_indent"] + 1 if line =~ /\{$/
+     trac["physical_interface_indent"] = trac["physical_interface_indent"] - 1 if line =~ /\}$/
    end       
 
    # start of routing-instances
@@ -34,10 +34,10 @@ def juniper_routing(line,last,trac,rancid_file)
    #    }
    #
    if line =~ /routing-instances \{/
-     trac["int_indent"] = 0
+     trac["physical_interface_indent"] = 0
    end 
    
-   if trac["int_indent"] == 1
+   if trac["physical_interface_indent"] == 1
      
      if line =~ /\w+ \{/
        trac["instance_name"] = line.gsub(/\s+/,'').gsub(/\{/,'')
@@ -70,14 +70,14 @@ def juniper_routing(line,last,trac,rancid_file)
    end
    
    # display this only when trying to debug
-  # if trac["int_indent"] > 0 and trac["instance_type"] == "vpls"
-   #if trac["int_indent"] > 0
-  #    puts "indent:#{trac["int_indent"]} instance_name:#{trac["instance_name"]} #{line}"
+  # if trac["physical_interface_indent"] > 0 and trac["instance_type"] == "vpls"
+   #if trac["physical_interface_indent"] > 0
+  #    puts "indent:#{trac["physical_interface_indent"]} instance_name:#{trac["instance_name"]} #{line}"
    #end
    
    
    # end of interface clear the state 
-   if trac["int_indent"] == 1 && line =~ /\}/
+   if trac["physical_interface_indent"] == 1 && line =~ /\}/
     
      if trac["instance_type"] == "vpls"
        device = rancid_file.gsub(/.*\//,'').gsub(/.moo.net|.moofoo.net/,'')
@@ -94,7 +94,7 @@ def juniper_routing(line,last,trac,rancid_file)
    end
    
    # end of indentation so we can process collected data
-   if trac["int_indent"] == -1
+   if trac["physical_interface_indent"] == -1
      trac["instance_name"]       = ""
      trac["instance_type"]       = ""
      trac["vla_id"]              = ""

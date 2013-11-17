@@ -34,8 +34,8 @@ class Device
   
  def tracDefaults
     # tracking
-    @trac["int_indent"]  = -2
-    @trac["unit_indent"] = -2
+    @trac["physical_interface_indent"]  = -2
+    @trac["unit_interface_indent"] = -2
     @trac["unit_state"]  = ""
     # collected data
     @trac["descr"] = ""
