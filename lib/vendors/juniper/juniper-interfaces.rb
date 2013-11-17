@@ -21,80 +21,12 @@ def juniper_interface
   juniper_vlan_tags
   juniper_interface_other
   juniper_ip_address
-  
-  process_physical = false
-  process_physical = true if (@Device.trac["encap"] =~ /frame-relay|flexible-ethernet-services|lacp/) and @Device.line =~ /\}|\{/
-  
-  if process_physical == true
-    if @Interface
-      # TODO: is this check below really needed at this point ? 
-      if @Interface.description =~ /\w+/
-        @Interface.encapsulation = trac["encap"]
-        if trac["encap"] =~ /flexible-ethernet-services|lacp/    
-          @Interface.name.gsub!(/\.0$/,'') if trac["unit"] == ""
-        end
-        @Interface.group = trac["group_current"]
-        @Device.interfaces.push @Interface 
-        @Interface = nil
-      end
-    end
-    # should we not be clearning more things here?
-    trac["encap"] = ''
-    trac["802.3ad"] = false
-  end
-  
-  # end of the unit config, proceed to parse description and other collected data
-  if trac["unit_interface_indent"] == -1 && trac["physical_interface_indent"] == 1
-    
-    if trac["descr"] =~ /\w+/
-     
-      if @Interface and trac["state"] !~ /disable/
-        # FIXME: massive kludge due to the amount of diffs between the original script having this "bug"
-        # must be removed once this is live as this is a cosmetic / graph interpreting aid. 
-        # This must be rewored as removal does not simply work.
-        if trac["encap"] != "frame-relay"
-          # only this line once script is live
-          @Interface.encapsulation = trac["encap"]
-        else
-          @Interface.encapsulation = ""
-        end
-      end
-      # FIXME: why is a nil hitting this part
-      if @Interface != nil
-        @Interface.group = trac["group_current"]
-        @Device.interfaces.push @Interface
-      end
-      @Interface = nil
-    end
-    # clear trac
-    trac["descr"] = ""
-    trac["interface"] = ""
-    trac["encap"] = ""
-    trac["inet"] = ""
-    trac["unit_state"] = ""
-    trac["unit_interface_indent"] = -2
-    trac["unit"] = ""
-    trac["physical_interface_descr"] = ""
-    trac["802.3ad"] = false
-    
-  end
-  
-  # end of interface clear the state 
-  if trac["physical_interface_indent"] == 1 && line =~ /\}/
-    trac["state"] = ""
-    # this only being done for encap
-    trac["encap"] = "" if trac["encap"] == "flexible-ethernet-services"
-  end
-  
-  # end of indentation so we can process collected data
-  if trac["physical_interface_indent"] == -1
-    trac["physical_interface"] = ""
-    trac["unit"] = ""
-    trac["encap"] = ""
-  end
-  
+  juniper_process_unit_interface
+  juniper_physical_interface_indent_end
   juniper_groups_applied
 end
+
+
 
 # handles all the indentation tracking so we know where we are
 def juniper_intenter
@@ -247,11 +179,14 @@ end
 def juniper_physical_interface_name
   # physical interface name
   if @Device.trac["physical_interface_indent"] == 1 && @Device.line =~ /\{$/
+    @Device.trac["is_inside_physical_interface"] = true
     interface = @Device.line.gsub(/\s+/,'').gsub!(/\{/,'')
     if interface !~ /\*|inactive/
       @Device.trac["physical_interface"] = interface
+      @Device.trac["interface"] = interface
+      # FIXME: why is this here ? 
       @Device.trac["encap"] = "" if @Device.trac["encap"] == "flexible-ethernet-services"
-      puts @Device.trac["physical_interface"]
+      @Interface = Juniper_Interface.new @Device.hostname, @Device.trac["interface"]
     end
   end
 end
@@ -259,15 +194,11 @@ end
 def juniper_unit_interface_name
   # unit name
   if @Device.line =~ /unit\s\d+\s\{/
+    juniper_process_physical_interface
+    @Device.trac["is_inside_unit_interface"] = true
     @Device.trac["encap"] = "" if @Device.trac["encap"] == "flexible-ethernet-services"
     @Device.trac["unit_interface_indent"] = 0
     @Device.trac["unit"] = @Device.line.gsub(/\s+/,'').gsub(/\{/,'').gsub!(/unit/,'')
-  end    
-end
-
-def juniper_interface_description
-  # interface desription and start of the interface creation
-  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /description/
     @Device.trac["physical_interface_descr"] = @Device.line
     if @Device.trac.has_key? "unit" and @Device.trac["unit"].to_i == 0
       @Device.trac["interface"] = "#{@Device.trac["physical_interface"]}.0"
@@ -276,8 +207,17 @@ def juniper_interface_description
       # insert kludge here to undo mistakes above as a way to transition this fix.
       @Device.trac["interface"].gsub!(/\.$/,'')
     end
-    @Device.trac["descr"] = @Device.line.gsub(/;/,'')
+    #puts "#{@Device.trac["interface"]}--"
     @Interface = Juniper_Interface.new @Device.hostname, @Device.trac["interface"]
+    
+  end    
+end
+
+
+def juniper_interface_description
+  # interface desription and start of the interface creation
+  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /description/
+    @Device.trac["descr"] = @Device.line.gsub(/;/,'')
     @Interface.description =  @Device.line.gsub(/;/,'')
     @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"]
     @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"] + '.0'
@@ -286,12 +226,80 @@ def juniper_interface_description
 
 end
 
+# end of physical interface indentation so we can process collected data
+def juniper_physical_interface_indent_end
+  if @Device.trac["physical_interface_indent"] == 1 && @Device.line =~ /\}/
+    @Device.trac["is_inside_physical_interface"] = false
+    @Device.trac["state"] = ""
+    # this only being done for encap
+    @Device.trac["encap"] = "" if @Device.trac["encap"] == "flexible-ethernet-services"
+  end
+  
+  if @Device.trac["physical_interface_indent"] == -1
+    @Device.trac["physical_interface"] = ""
+    @Device.trac["unit"] = ""
+    @Device.trac["encap"] = ""
+  end
+end
 
+def juniper_process_physical_interface
 
+    if @Interface
+      # TODO: is this check below really needed at this point ? 
+      if @Interface.description =~ /\w+/
+        @Interface.encapsulation = @Device.trac["encap"]
+        if @Device.trac["encap"] =~ /flexible-ethernet-services|lacp/    
+          @Interface.name.gsub!(/\.0$/,'') if @Device.trac["unit"] == ""
+        end
+        @Interface.group = @Device.trac["group_current"]
+        @Device.interfaces.push @Interface 
+        @Interface = nil
+      end
+      # should we not be clearning more things here?
+      @Device.trac["encap"] = ''
+      @Device.trac["802.3ad"] = false
+      @Device.trac["description"] = ""
+    end
 
+    
+end
 
+def juniper_trac_clear
+  @Device.trac["descr"] = ""
+  @Device.trac["interface"] = ""
+  @Device.trac["encap"] = ""
+  @Device.trac["inet"] = ""
+  @Device.trac["unit_state"] = ""
+  @Device.trac["unit_interface_indent"] = -2
+  @Device.trac["unit"] = ""
+  @Device.trac["physical_interface_descr"] = ""
+  @Device.trac["802.3ad"] = false
+  @Device.trac["physical_interface"] = ""
+  @Device.trac["description"] = ""
+end
 
-
+# end of the unit config, proceed to parse description and other collected data
+def juniper_process_unit_interface
+  if @Device.trac["unit_interface_indent"] == -1 && @Device.trac["physical_interface_indent"] == 1
+    @Device.trac["is_inside_unit_interface"] = false
+    if @Interface and @Device.trac["state"] !~ /disable/
+      @Device.trac["descr"] = "#{@Device.hostname} __ #{@Interface.name}" if @Device.trac["descr"] !~ /\w+/
+        if @Device.trac["encap"] != "frame-relay"
+          # only this line once script is live
+          @Interface.encapsulation = @Device.trac["encap"]
+        else
+          @Interface.encapsulation = ""
+        end
+      # FIXME: why is a nil hitting this part
+      if @Interface != nil
+        @Interface.group = @Device.trac["group_current"]
+        @Device.interfaces.push @Interface
+      end
+      @Interface = nil
+    end
+    juniper_trac_clear
+  end
+end
 
 
 

@@ -53,6 +53,10 @@ class Device
     @trac["group_start"] = false 
     @trac["group_indent"] = -1
     @trac["group_name_is_next"] = false
+    @trac["is_inside_physical_interface"] = false
+    @trac["is_inside_unit_interface"] = false
+    @trac["description"] = ""
+    
   end
 
 end # Class Device
@@ -145,10 +149,11 @@ class Interface
     @DeviceName = device
     @group = ""
     # mostly being done like this so i keep track of them, will clean up once i got a scope of the requirements
-    @valid, @status, @encapsulation, @mnemonic, @descriptions, @is_valid_descriptions = false, "", "", "", "", false
-    @telco, @circuit, @DeviceName, @config_summary_done, @vrf, @address, @netmask, @state,@l12type = "", "", "", false, "", "", "", "", ""
+    @valid, @status, @encapsulation, @mnemonic, @is_valid_descriptions = false, "", "","", false
+    @telco, @circuit, @config_summary_done, @vrf, @address, @netmask, @state,@l12type = "", "", false, "", "", "", "", ""
     @vlan_tags = ""
     @connected_routes = ConnectedRoutes.new device, @name
+    @description = "#{@DeviceName}__#{@name}"
   end
   
   # FIXME: These methods are placeholders
