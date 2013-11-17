@@ -153,6 +153,15 @@ class Interface
   
   # FIXME: These methods are placeholders
   def description=(new_description)
+    # basic description line clean up
+    new_description.gsub!(/^\s+/,'')
+    new_description.gsub!(/description\s+/,'')
+    new_description.gsub!(/description/,'')
+    new_description.gsub!(/"/,'')
+    new_description.gsub!(/'/,'')
+    new_description.gsub!(/\s+$/,'')
+    new_description.gsub!(/\s+/,' ')
+    new_description.gsub!(/[^0-9A-Za-z\s\\\/\(\)-\._&@'=:]/, '')
     @description = new_description
   end
 
