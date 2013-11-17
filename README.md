@@ -7,7 +7,7 @@ At the moment only routes are supported, currently its the default.
 Outputs all connected and static routes
 
 ```
-./bin/rancid-summarizer.rb --rancid_dir samples/rancid --filter bb1
+./bin/rancid-summarizer.rb --rancid_dir samples/rancid --filter bb1 --mode routes
 connected route;bb1.moofia.net;Loopback197;197.68.22.254;255.255.255.0
 connected route secondary;bb1.moofia.net;Loopback197;197.68.21.254;255.255.255.0
 connected route secondary;bb1.moofia.net;Loopback197;197.68.5.254;255.255.255.0
