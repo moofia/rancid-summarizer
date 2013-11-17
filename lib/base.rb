@@ -7,6 +7,7 @@ def getOptions
   begin
     $opt = Getopt::Long.getopts(
       ["--debug",  Getopt::BOOLEAN],
+      ["--debug2",  Getopt::BOOLEAN],
       ["--help",   Getopt::BOOLEAN],
       ["--ignore-interface-state",   Getopt::BOOLEAN],
       ["--mode",   Getopt::OPTIONAL],
@@ -66,6 +67,7 @@ puts <<HELP
   --filter [regex]           regex filter (optional, defaults to everything)
   --mode                     descriptions
   --debug                    extra log messages for debugging
+  --debug2                   extra extra log messages for debugging (can be a bit hairy)
   --rancid_dir               directory of where rancid data is stored (can only be used in validation mode)
   --ignore-interface-state   ignore the interface state
   --help

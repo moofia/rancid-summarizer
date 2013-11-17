@@ -9,24 +9,27 @@ def juniper_interface
   
   juniper_vrf_find_interfaces
   juniper_intenter
-   
-  trac["group_current"] = "" if trac["group_indent"] < 0
-   
-  # groups
-  trac["group_indent"]        = 0 if line =~ /^groups \{/
-  trac["group_name_is_next"]  = true if trac["group_indent"] == 0
-  if trac["group_indent"]     > 0 and trac["group_name_is_next"] 
-   trac["group_current"]      = @Device.line.gsub(/\s{/,"").gsub(/^\s+/,'')
-   trac["group_name_is_next"] = false
-  end
   
+  # display this only when trying to debug
+  if $opt["debug2"]
+    if trac["physical_interface_indent"] > 0
+     puts "indent:#{trac["physical_interface_indent"]} indent_unit:#{trac["unit_interface_indent"]} #{line} ---> #{trac["physical_interface"]}:#{trac["unit"]} "
+    end
+  end
+
+  juniper_groups_tracking
+
   # start of interfaces
   trac["physical_interface_indent"] = 0 if line =~ /interfaces \{/
    
   # physical interface name
   if trac["physical_interface_indent"] == 1 && line =~ /\{$/
-    trac["physical_interface"] = line.gsub(/\s+/,'').gsub!(/\{/,'')
-    trac["encap"] = "" if trac["encap"] == "flexible-ethernet-services"
+    interface = line.gsub(/\s+/,'').gsub!(/\{/,'')
+    if interface !~ /\*|inactive/
+      trac["physical_interface"] = interface
+      trac["encap"] = "" if trac["encap"] == "flexible-ethernet-services"
+      puts trac["physical_interface"]
+    end
   end
       
    # unit name
@@ -36,13 +39,8 @@ def juniper_interface
      trac["unit"] = line.gsub(/\s+/,'').gsub(/\{/,'').gsub!(/unit/,'')
    end    
    
-  # state of the physical interface of the unit, can be disabled seperately so we have
-  # to keep track of both.
-  trac["state"] = "disable" if  trac["physical_interface_indent"]  > 0 && line =~ /disable;/
-  trac["unit_state"] = "disable" if  trac["unit_interface_indent"] > 0 && line =~ /disable;/
-  trac["state"] = "enable" if  trac["physical_interface_indent"]  > 0 && line =~ /enable;/
-  trac["unit_state"] = "enable" if  trac["unit_interface_indent"] > 0 && line =~ /enable;/
-         
+   juniper_interface_state
+   
    # interface desription and start of the interface creation
    if trac["physical_interface_indent"] > 0  && line =~ /description/
      trac["physical_interface_descr"] = line
@@ -65,56 +63,9 @@ def juniper_interface
      #puts "XXX juniper_interface --> #{@Interface.inspect}"
    end
    
-   
-   # interface vlan tags
-   # vlan-tags outer 2191 inner 3547; 
-   if trac["physical_interface_indent"] > 0  && line =~ /vlan-tags outer (\d+) inner (\d+)/
-     outer = $1
-     inner = $2
-     if (outer =~ /\d+/ and inner =~ /\d+/ and @Interface)
-       @Interface.vlan_tags = inner + "," + outer
-     end
-   end
-   
-   # vlan-id 3508; 
-   
-   if trac["physical_interface_indent"] > 0  && line =~ /vlan-id (\d+);/
-     inner = $1
-     if (inner =~ /\d+/ and @Interface)
-       @Interface.vlan_tags = inner
-     end
-   end
-     
-   # encapsulation
-   if trac["physical_interface_indent"] > 0  && line =~ /encapsulation (cisco-hdlc|frame-relay|flexible-ethernet-services);/
-     trac["encap"] = $1
-     trac["encap"].gsub!(/cisco-/,'')
-   end
-
-   # 802.3ad
-   if trac["physical_interface_indent"] > 0  && line =~ /gigether-options \{/
-     trac["802.3ad"] = true
-   end
-    
-   if trac["physical_interface_indent"] > 0  && line =~ /802.3ad .*;/ && trac["802.3ad"]
-     trac["encap"] = "lacp"
-   end
-
-   # ip address
-   if trac["physical_interface_indent"] > 0  && last =~ /family inet \{/      
-     trac["inet"] = 1     
-   end
-   
-   if trac["inet"] == 1 && line =~ /\s+address\s(.*)\/(\d+);/
-     if @Interface
-       @Interface.connected_routes.routes.push "#{$1}/#{$2}"
-     end        
-   end
-   
-   # display this only when trying to debug
-   #if trac["physical_interface_indent"] > 0
-   # puts "indent:#{trac["physical_interface_indent"]} indent_unit:#{trac["unit_interface_indent"]} #{line} ---> #{trac["physical_interface"]}:#{trac["unit"]} "
-   #end
+   juniper_vlan_tags
+   juniper_interface_other
+   juniper_ip_address
 
    process_physical = false
    process_physical = true if (trac["encap"] =~ /frame-relay|flexible-ethernet-services|lacp/) and line =~ /\}|\{/
@@ -206,6 +157,7 @@ def juniper_intenter
    end   
 end
 
+# knowing which vrf an interface is in is required by various summaries
 def juniper_vrf_find_interfaces
   # collect interfaces that are in a vrf
    if @Device.trac["juniper_vrf"] == 0
@@ -229,6 +181,17 @@ def juniper_vrf_find_interfaces
    end
 end
 
+# keep track of groups / name / position
+def juniper_groups_tracking
+  @Device.trac["group_current"]       = "" if @Device.trac["group_indent"] < 0
+  @Device.trac["group_indent"]        = 0 if @Device.line =~ /^groups \{/
+  @Device.trac["group_name_is_next"]  = true if @Device.trac["group_indent"] == 0
+  if @Device.trac["group_indent"]     > 0 and @Device.trac["group_name_is_next"] 
+    @Device.trac["group_current"]      = @Device.line.gsub(/\s{/,"").gsub(/^\s+/,'')
+    @Device.trac["group_name_is_next"] = false
+  end
+end
+
 # get a list of groups that have been applied. 
 # later output will only be given for a group if it is applied.
 def juniper_groups_applied
@@ -240,13 +203,95 @@ def juniper_groups_applied
   end
   
   if @Device.line =~ /^apply-groups/
-    @Device.line.gsub(/apply-groups \[ /,'').gsub(/ \]$/,'').split(" ").each do |g|
+    @Device.line.gsub(/apply-groups \[ /,'').gsub(/ \];$/,'').split(" ").each do |g|
       @Device.groups[g] = true
     end
          
-    @Device.trac["group_end_needed"] = true if @Device.line !~ / \];$/
+  @Device.trac["group_end_needed"] = true if @Device.line !~ / \];$/
   end
   
 end
+
+# state of the physical interface of the unit, can be disabled seperately so we have
+# to keep track of both.
+def juniper_interface_state
+  @Device.trac["state"] = "enable" if  @Device.trac["physical_interface_indent"]  > 0 && @Device.line =~ /enable;/
+  @Device.trac["state"] = "disable" if  @Device.trac["physical_interface_indent"]  > 0 && @Device.line =~ /disable;/
+  @Device.trac["unit_state"] = "enable" if  @Device.trac["unit_interface_indent"] > 0 && @Device.line =~ /enable;/
+  @Device.trac["unit_state"] = "disable" if  @Device.trac["unit_interface_indent"] > 0 && @Device.line =~ /disable;/
+end
+
+def juniper_vlan_tags
+   
+  # interface vlan tags
+  # vlan-tags outer 2191 inner 3547; 
+  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /vlan-tags outer (\d+) inner (\d+)/
+    outer = $1
+    inner = $2
+    if (outer =~ /\d+/ and inner =~ /\d+/ and @Interface)
+      @Interface.vlan_tags = inner + "," + outer
+    end
+  end
+  
+  # vlan-id 3508; 
+  
+  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /vlan-id (\d+);/
+    inner = $1
+    if (inner =~ /\d+/ and @Interface)
+      @Interface.vlan_tags = inner
+    end
+  end
+
+end
+
+# ip address
+def juniper_ip_address
+  if @Device.trac["physical_interface_indent"] > 0  && @Device.last =~ /family inet \{/      
+    @Device.trac["inet"] = 1     
+  end
+  
+  if @Device.trac["inet"] == 1 && @Device.line =~ /\s+address\s(.*)\/(\d+);/
+    if @Interface
+      @Interface.connected_routes.routes.push "#{$1}/#{$2}"
+    end        
+  end
+end
+
+def juniper_interface_other   
+  # encapsulation
+  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /encapsulation (cisco-hdlc|frame-relay|flexible-ethernet-services);/
+    @Device.trac["encap"] = $1
+    @Device.trac["encap"].gsub!(/cisco-/,'')
+  end
+  
+  # 802.3ad
+  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /gigether-options \{/
+    @Device.trac["802.3ad"] = true
+  end
+   
+  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /802.3ad .*;/ && @Device.trac["802.3ad"]
+    @Device.trac["encap"] = "lacp"
+  end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
