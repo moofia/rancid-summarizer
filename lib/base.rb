@@ -93,7 +93,8 @@ end
 def processSummaries
   # process all the summaries
   @Device.interfaces.each do |interface|
-    interface.connected_routes.to_routes_summary if $opt["mode"] == "routes"
+    #interface.connected_routes.to_routes_summary if $opt["mode"] == "routes"
+    puts "#{interface.name} --> #{interface.description}"
   end
   @Device.summarizeStaticRoutes if $opt["mode"] == "routes"
   
