@@ -13,3 +13,9 @@ descriptions:
     - moofiaa.net
   domain_strip: true
   file: /tmp/c
+
+rancid:
+  exclude groups:
+    - cust
+    - foo
+    - bar

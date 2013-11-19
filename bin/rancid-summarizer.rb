@@ -47,11 +47,8 @@ end
 # is we are able to parse the file based on vendor type.
 Dir.foreach(rancid_dir) do |directory|
   next if directory =~ /^\./
-  # TODO: refactor ignors!!!
-  next if directory =~ /^CVS/
-  next if directory =~ /^\.svn/
-  next if directory =~ /^cs$/
-  next if directory =~ /^cust$/
+  next if directory =~ /^CVS|^\.svn/
+  next if rancid_exclude_directory(directory)
   next if not File.directory? "#{rancid_dir}/#{directory}"
   
   db = "#{rancid_dir}/#{directory}/router.db"
@@ -97,3 +94,6 @@ Dir.foreach(rancid_dir) do |directory|
     end # File.open(db).readlines
   end # File.exists? db
 end #  Dir.foreach
+
+
+

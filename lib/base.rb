@@ -40,9 +40,9 @@ end
 
 def loadConfigs
   begin
-    $config = YAML::load(File.read("#{scriptDirectory}/etc/descriptions.yaml"))
+    $config = YAML::load(File.read("#{scriptDirectory}/etc/rancid-summarizer.yaml"))
   rescue => e
-    puts "#{@script} -> yaml error #{e.message} in etc/descriptions.yaml}"  
+    puts "#{@script} -> yaml error #{e.message} in etc/rancid-summarizer.yaml}"  
     exit 2
   end
 end
@@ -99,4 +99,18 @@ def processSummaries
   @Device.summarizeStaticRoutes if $opt["mode"] == "routes"
   
   #debug @Device.groups
+end
+
+def rancid_exclude_directory(directory)
+  exclude = false
+  if $config.has_key? "rancid"
+    if $config["rancid"].has_key? "exclude groups"
+      if $config["rancid"]["exclude groups"].class == Array
+        $config["rancid"]["exclude groups"].each do |exclude_directory|
+          exclude = true if exclude_directory == directory
+        end
+      end
+    end
+  end
+  exclude
 end

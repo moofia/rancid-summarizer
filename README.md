@@ -1,6 +1,11 @@
 #RANCID Summarization
 
-At the moment only routes are supported.
+## History
+
+Having been fortunate to have worked for UUNET MCI/WorldCom for 8 years in the emerging markets of Africa we had to smart about operational resources. 
+Our primary focus on was on provisioning systems for the network. 
+
+This project aims to bridge the gap between provisioned networks and those configured manually enabling systems that rely on network data to be automated.
 
 ##routes
 

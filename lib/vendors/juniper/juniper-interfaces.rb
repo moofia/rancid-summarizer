@@ -181,7 +181,7 @@ def juniper_physical_interface_name
   if @Device.trac["physical_interface_indent"] == 1 && @Device.line =~ /\{$/
     @Device.trac["is_inside_physical_interface"] = true
     interface = @Device.line.gsub(/\s+/,'').gsub!(/\{/,'')
-    if interface !~ /\*|inactive/
+    if interface !~ /\*/
       @Device.trac["physical_interface"] = interface
       @Device.trac["interface"] = interface
       # FIXME: why is this here ? 
