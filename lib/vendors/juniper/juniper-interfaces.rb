@@ -8,8 +8,7 @@ def juniper_interface
   rancid_file = @Device.rancid_file
   
   # order of methods is critical
-  #juniper_vrf_find_interfaces
-  juniper_intenter
+  juniper_indenter
   juniper_debug_2
   
   juniper_groups_tracking
@@ -24,12 +23,13 @@ def juniper_interface
   juniper_process_unit_interface
   juniper_physical_interface_indent_end
   juniper_groups_applied
+  juniper_vrf_interfaces
 end
 
 
 
 # handles all the indentation tracking so we know where we are
-def juniper_intenter
+def juniper_indenter
    if @Device.trac["physical_interface_indent"] >= 0
      @Device.trac["physical_interface_indent"]   = @Device.trac["physical_interface_indent"] + 1 if @Device.line =~ /\{$/
      @Device.trac["physical_interface_indent"]   = @Device.trac["physical_interface_indent"] - 1 if @Device.line =~ /\}$/
@@ -42,31 +42,6 @@ def juniper_intenter
      @Device.trac["group_indent"]   = @Device.trac["group_indent"] + 1 if @Device.line =~ /\{$/
      @Device.trac["group_indent"]   = @Device.trac["group_indent"] - 1 if @Device.line =~ /\}$/
    end   
-end
-
-# knowing which vrf an interface is in is required by various summaries
-# FIXME: remove this
-def juniper_vrf_find_interfaces
-  # collect interfaces that are in a vrf
-   if @Device.trac["juniper_vrf"] == 0
-     # must catch this error 
-     # invalid byte sequence in UTF-8
-     begin
-       v_last = ""
-       File.open(@Device.rancid_file).readlines.each do |v|    
-         @Device.trac["juniper_vrf"] = 2 if  v_last =~ /instance-type\s(.*)/ 
-         if  @Device.trac["juniper_vrf"] == 2 && v =~ /interface\s(.*);/
-           @Device.trac["juniper"][$1] = 1
-         end
-         v_last = v
-       end
-       @Device.trac["juniper_vrf"] = 1
-     rescue ArgumentError => e
-       if $opt["debug"]
-         puts "error: #{e}" 
-       end
-     end  
-   end
 end
 
 # keep track of groups / name / position
@@ -135,10 +110,10 @@ end
 # ip address
 def juniper_ip_address
   if @Device.trac["physical_interface_indent"] > 0  && @Device.last =~ /family inet \{/      
-    @Device.trac["inet"] = 1     
+    @Device.trac["family inet"] = 1     
   end
   
-  if @Device.trac["inet"] == 1 && @Device.line =~ /\s+address\s(.*)\/(\d+);/
+  if @Device.trac["family inet"] == 1 && @Device.line =~ /\s+address\s(.*)\/(\d+);/
     if @Interface
       #debug @Interface if $1 == "41.181.188.84"
       @Interface.connected_routes.routes.push "#{$1}/#{$2}"
@@ -226,8 +201,8 @@ def juniper_interface_description
       @Device.trac["descr"] = @Device.line.gsub(/;/,'')
       @Interface.description =  @Device.line.gsub(/;/,'')
       # no idea why this is here????
-      #@Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"]
-      #@Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"] + '.0'
+      #@Interface.vrf = "yes" if @Device.trac["juniper vrf interface"].has_key? @Device.trac["interface"]
+      #@Interface.vrf = "yes" if @Device.trac["juniper vrf interface"].has_key? @Device.trac["interface"] + '.0'
       @Interface.encapsulation = @Device.trac["encap"] if @Device.trac["encap"] != ""
     end
   end
@@ -278,7 +253,7 @@ def juniper_trac_clear
   @Device.trac["descr"] = ""
   @Device.trac["interface"] = ""
   @Device.trac["encap"] = ""
-  @Device.trac["inet"] = ""
+  @Device.trac["family inet"] = ""
   @Device.trac["unit_state"] = ""
   @Device.trac["unit_interface_indent"] = -2
   @Device.trac["unit"] = ""
@@ -311,7 +286,11 @@ def juniper_process_unit_interface
   end
 end
 
-
+def juniper_vrf_interfaces
+  if  @Device.last =~ /instance-type\s(.*)/ && @Device.line =~ /interface\s(.*);/
+    @Device.trac["juniper vrf interface"][$1] = true
+  end
+end
 
 
 

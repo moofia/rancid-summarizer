@@ -46,9 +46,9 @@ class Device
     @trac["alcatel_port_start"] = 0
     @trac["alcatel_lag_start"]  = 0
     # juniper uniq
-    @trac["juniper"]     = {}
+    @trac["juniper vrf interface"]     = {}
     @trac["juniper_vrf"] = 0
-    @trac["inet"]        = ""
+    @trac["family inet"]        = ""
     @trac["group_end_needed"] = false
     @trac["group_start"] = false 
     @trac["group_indent"] = -1
