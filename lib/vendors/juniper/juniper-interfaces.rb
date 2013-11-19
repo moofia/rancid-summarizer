@@ -282,7 +282,6 @@ def juniper_trac_clear
   @Device.trac["unit_state"] = ""
   @Device.trac["unit_interface_indent"] = -2
   @Device.trac["unit"] = ""
-  @Device.trac["physical_interface_descr"] = ""
   @Device.trac["802.3ad"] = false
   @Device.trac["description"] = ""
 end
