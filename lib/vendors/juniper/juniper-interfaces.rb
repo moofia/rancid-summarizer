@@ -166,7 +166,7 @@ def juniper_debug_2
   # display this only when trying to debug
   if $opt["debug2"]
     if @Device.trac["physical_interface_indent"] > 0
-     puts "indent:#{@Device.trac["physical_interface_indent"]} indent_unit:#{@Device.trac["unit_interface_indent"]} #{@Device.line} ---> #{@Device.trac["physical_interface"]}:#{@Device.trac["unit"]} "
+     puts "#{@Device.hostname} [line #{@Device.trac["line_number"]}] indent:#{@Device.trac["physical_interface_indent"]} indent_unit:#{@Device.trac["unit_interface_indent"]} #{@Device.line} ---> #{@Device.trac["physical_interface"]}:#{@Device.trac["unit"]} "
     end
   end
 end
@@ -216,12 +216,14 @@ end
 
 def juniper_interface_description
   # interface desription and start of the interface creation
-  if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /description/
-    @Device.trac["descr"] = @Device.line.gsub(/;/,'')
-    @Interface.description =  @Device.line.gsub(/;/,'')
-    @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"]
-    @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"] + '.0'
-    @Interface.encapsulation = @Device.trac["encap"] if @Device.trac["encap"] != ""
+  if @Interface
+    if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /description/
+      @Device.trac["descr"] = @Device.line.gsub(/;/,'')
+      @Interface.description =  @Device.line.gsub(/;/,'')
+      @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"]
+      @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"] + '.0'
+      @Interface.encapsulation = @Device.trac["encap"] if @Device.trac["encap"] != ""
+    end
   end
 
 end
