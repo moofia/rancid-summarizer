@@ -56,6 +56,7 @@ class Device
     @trac["is_inside_physical_interface"] = false
     @trac["is_inside_unit_interface"] = false
     @trac["description"] = ""
+    @trac["line_number"] = 0
     
   end
 

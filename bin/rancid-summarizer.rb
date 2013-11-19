@@ -69,7 +69,7 @@ Dir.foreach(rancid_dir) do |directory|
       
       # filter what devices we want, by default all
       next if @Device.rancid_file !~ /#{@filter}/
-      
+      @Device.trac["line_number"] = 0
       if File.exists? @Device.rancid_file
         log("debug: file #{@Device.rancid_file} --> #{@Device.vendor}") if $opt["debug"]
         File.open(@Device.rancid_file).readlines.each do |line|
@@ -87,6 +87,7 @@ Dir.foreach(rancid_dir) do |directory|
               puts "error: #{e}"
             end
           end
+          @Device.trac["line_number"] = @Device.trac["line_number"] + 1;
         end # File.open(c).readlines
         
         processSummaries
