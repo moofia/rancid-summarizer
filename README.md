@@ -1,4 +1,6 @@
-#RANCID Summarization
+#RANCID Summarizer
+
+Extracting your data from your network.
 
 ## History
 
@@ -40,5 +42,5 @@ static route;bb1.moofia.net;0.0.0.0/0.0.0.0 150.1.6.1
 
 ##TODO / BUGS
 
-* juniper issue with not all interfaces being picked up
 * juniper static routes not being picked up
+* vrf routes not being added

@@ -8,7 +8,7 @@ def juniper_interface
   rancid_file = @Device.rancid_file
   
   # order of methods is critical
-  juniper_vrf_find_interfaces
+  #juniper_vrf_find_interfaces
   juniper_intenter
   juniper_debug_2
   
@@ -45,6 +45,7 @@ def juniper_intenter
 end
 
 # knowing which vrf an interface is in is required by various summaries
+# FIXME: remove this
 def juniper_vrf_find_interfaces
   # collect interfaces that are in a vrf
    if @Device.trac["juniper_vrf"] == 0
@@ -139,6 +140,7 @@ def juniper_ip_address
   
   if @Device.trac["inet"] == 1 && @Device.line =~ /\s+address\s(.*)\/(\d+);/
     if @Interface
+      #debug @Interface if $1 == "41.181.188.84"
       @Interface.connected_routes.routes.push "#{$1}/#{$2}"
     end        
   end
@@ -220,8 +222,9 @@ def juniper_interface_description
     if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /description/
       @Device.trac["descr"] = @Device.line.gsub(/;/,'')
       @Interface.description =  @Device.line.gsub(/;/,'')
-      @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"]
-      @Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"] + '.0'
+      # no idea why this is here????
+      #@Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"]
+      #@Interface.vrf = "yes" if @Device.trac["juniper"].has_key? @Device.trac["interface"] + '.0'
       @Interface.encapsulation = @Device.trac["encap"] if @Device.trac["encap"] != ""
     end
   end
@@ -248,13 +251,15 @@ def juniper_process_physical_interface
 
     if @Interface
       # TODO: is this check below really needed at this point ? 
-      if @Interface.description =~ /\w+/
+      if @Interface.connected_routes.routes.count > 0 or @Device.trac["encap"] =~ /flexible-ethernet-services|lacp/  
+      #if @Interface.description =~ /\w+/
         @Interface.encapsulation = @Device.trac["encap"]
         if @Device.trac["encap"] =~ /flexible-ethernet-services|lacp/    
           @Interface.name.gsub!(/\.0$/,'') if @Device.trac["unit"] == ""
         end
         @Interface.group = @Device.trac["group_current"]
-        @Device.interfaces.push @Interface 
+        # FIXME: make your mind
+        #@Device.interfaces.push @Interface 
         @Interface = nil
       end
       # should we not be clearning more things here?
@@ -294,8 +299,10 @@ def juniper_process_unit_interface
         end
       # FIXME: why is a nil hitting this part
       if @Interface != nil
-        @Interface.group = @Device.trac["group_current"]
-        @Device.interfaces.push @Interface
+        if (@Interface.connected_routes.routes.count > 0 or @Device.trac["encap"] =~ /flexible-ethernet-services|lacp/) and @Interface.name =~ /\w/
+          @Interface.group = @Device.trac["group_current"]
+          @Device.interfaces.push @Interface
+        end
       end
       @Interface = nil
     end

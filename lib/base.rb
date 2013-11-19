@@ -9,6 +9,7 @@ def getOptions
       ["--debug",  Getopt::BOOLEAN],
       ["--debug2",  Getopt::BOOLEAN],
       ["--help",   Getopt::BOOLEAN],
+      ["--with-warnings",  Getopt::BOOLEAN],
       ["--ignore-interface-state",   Getopt::BOOLEAN],
       ["--mode",   Getopt::OPTIONAL],
       ["--filter", Getopt::OPTIONAL],
@@ -70,6 +71,7 @@ puts <<HELP
   --debug2                   extra extra log messages for debugging (can be a bit hairy)
   --rancid_dir               directory of where rancid data is stored (can only be used in validation mode)
   --ignore-interface-state   ignore the interface state
+  --with-warnings            will display warnings to STDERR
   --help
 
 HELP
@@ -93,8 +95,21 @@ end
 def processSummaries
   # process all the summaries
   @Device.interfaces.each do |interface|
-    interface.connected_routes.to_routes_summary if $opt["mode"] == "routes"
-    #puts "#{interface.name} --> #{interface.description}"
+    display = true
+    if @Device.vendor == "juniper"
+      if interface.group =~ /\w/
+        if not @Device.groups.has_key? interface.group
+          display = false 
+          @warnings.push "warning #{@Device.hostname} #{interface.name} configured in group \"#{interface.group}\" yet group is not applied"
+        end
+      end
+    end
+    
+    if display
+      interface.connected_routes.to_routes_summary if $opt["mode"] == "routes"
+      #puts "#{interface.name} --> #{interface.description}"
+    end
+  
   end
   @Device.summarizeStaticRoutes if $opt["mode"] == "routes"
   
@@ -113,4 +128,12 @@ def rancid_exclude_directory(directory)
     end
   end
   exclude
+end
+
+def display_warnings
+  if $opt["with-warnings"]
+    @warnings.each do |warning|
+      $stderr.puts "#{@script} -> #{warning}"
+    end
+  end
 end

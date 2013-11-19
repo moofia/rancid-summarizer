@@ -29,6 +29,8 @@ getOptions
 loadConfigs
 postChecks
 
+@warnings = []
+
 # default is descriptions
 $opt["mode"] = "routes" if not $opt.has_key? "mode"
  
@@ -46,8 +48,7 @@ end
 # open the rancid directory and look for router.db files, once we know which vendor type a device
 # is we are able to parse the file based on vendor type.
 Dir.foreach(rancid_dir) do |directory|
-  next if directory =~ /^\./
-  next if directory =~ /^CVS|^\.svn/
+  next if directory =~ /^\.|^CVS/
   next if rancid_exclude_directory(directory)
   next if not File.directory? "#{rancid_dir}/#{directory}"
   
@@ -95,5 +96,6 @@ Dir.foreach(rancid_dir) do |directory|
   end # File.exists? db
 end #  Dir.foreach
 
+display_warnings
 
 
