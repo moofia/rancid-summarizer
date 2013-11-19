@@ -168,7 +168,10 @@ def juniper_debug_2
   # display this only when trying to debug
   if $opt["debug2"]
     if @Device.trac["physical_interface_indent"] > 0
-     puts "#{@Device.hostname} [line #{@Device.trac["line_number"]}] indent:#{@Device.trac["physical_interface_indent"]} indent_unit:#{@Device.trac["unit_interface_indent"]} #{@Device.line} ---> #{@Device.trac["physical_interface"]}:#{@Device.trac["unit"]} "
+      
+     print "#{@Device.hostname} [line #{@Device.trac["line_number"]}] "
+     print "phys indent:#{@Device.trac["physical_interface_indent"]} unit indent:#{@Device.trac["unit_interface_indent"]} #{@Device.line}"
+     puts  " ---> #{@Device.trac["physical_interface"]}:#{@Device.trac["unit"]} "
     end
   end
 end
@@ -281,7 +284,6 @@ def juniper_trac_clear
   @Device.trac["unit"] = ""
   @Device.trac["physical_interface_descr"] = ""
   @Device.trac["802.3ad"] = false
-  @Device.trac["physical_interface"] = ""
   @Device.trac["description"] = ""
 end
 
