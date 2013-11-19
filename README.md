@@ -1,6 +1,6 @@
 #RANCID Summarization
 
-At the moment only routes are supported, currently its the default.
+At the moment only routes are supported.
 
 ##routes
 
