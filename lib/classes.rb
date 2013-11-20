@@ -27,7 +27,13 @@ class Device
   
   def summarizeStaticRoutes
     @static_routes.each do |route|
-      puts "static route;#{@hostname};#{route}"
+      type = "static route"
+      if route =~ /vrf\s(\d+:\d+)\s(\d.*)/
+        route = "#{$1};#{$2}"
+        type = "static route vrf"
+        
+      end
+      puts "#{type};#{@hostname};#{route}"
     end
     
   end
