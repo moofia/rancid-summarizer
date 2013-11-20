@@ -42,5 +42,5 @@ static route;bb1.moofia.net;0.0.0.0/0.0.0.0 150.1.6.1
 
 ##TODO / BUGS
 
-* juniper static routes not being picked up
-* vrf routes not being added
+* juniper : when a physical interface has a single unit of zero the unit will be referenced as the physical interface
+

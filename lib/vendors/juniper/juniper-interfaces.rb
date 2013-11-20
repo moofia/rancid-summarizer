@@ -97,18 +97,9 @@ end
 
 # handles all the indentation tracking so we know where we are
 def juniper_indenter
-   if @Device.trac["physical_interface_indent"] >= 0
-     @Device.trac["physical_interface_indent"]   = @Device.trac["physical_interface_indent"] + 1 if @Device.line =~ /\{$/
-     @Device.trac["physical_interface_indent"]   = @Device.trac["physical_interface_indent"] - 1 if @Device.line =~ /\}$/
-   end
-   if @Device.trac["unit_interface_indent"] >= 0
-     @Device.trac["unit_interface_indent"]   = @Device.trac["unit_interface_indent"] + 1 if @Device.line =~ /\{$/
-     @Device.trac["unit_interface_indent"]   = @Device.trac["unit_interface_indent"] - 1 if @Device.line =~ /\}$/
-   end
-   if @Device.trac["group_indent"] >= 0
-     @Device.trac["group_indent"]   = @Device.trac["group_indent"] + 1 if @Device.line =~ /\{$/
-     @Device.trac["group_indent"]   = @Device.trac["group_indent"] - 1 if @Device.line =~ /\}$/
-   end   
+  juniper_indent_c_tags("physical_interface_indent")
+  juniper_indent_c_tags("unit_interface_indent")
+  juniper_indent_c_tags("group_indent")
 end
 
 # keep track of groups / name / position
