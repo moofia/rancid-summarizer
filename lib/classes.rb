@@ -57,6 +57,11 @@ class Device
     @trac["is_inside_unit_interface"] = false
     @trac["description"] = ""
     @trac["line_number"] = 0
+    @trac["indent_routing_instance"] = -1 
+    @trac["indent_static_routes"] = -1
+    @trac["indent_static_routes_expanded"] = -1
+    @trac["static_routes_expanded"] = ""
+    @trac["routing_instance_type"] = ""
     
   end
 

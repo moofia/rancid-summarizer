@@ -24,8 +24,75 @@ def juniper_interface
   juniper_physical_interface_indent_end
   juniper_groups_applied
   juniper_vrf_interfaces
+  
+  juniper_routing_instance_static_routes
 end
 
+def juniper_indent_c_tags(key)
+  if @Device.trac[key] >= 0
+    @Device.trac[key]   = @Device.trac[key] + 1 if @Device.line =~ /\{$/
+    @Device.trac[key]   = @Device.trac[key] - 1 if @Device.line =~ /\}$/
+  end
+end
+
+def juniper_routing_instance_static_routes
+  
+  juniper_indent_c_tags("indent_routing_instance")
+  
+  @Device.trac["vrf_rd_current"]          = "" if @Device.trac["indent_routing_instance"] == -1
+  @Device.trac["routing_instance_type"]   = "" if @Device.trac["indent_routing_instance"] == -1
+  if @Device.trac["indent_static_routes_expanded"] == -1 and @Device.trac["static_routes_expanded"]  != ""
+    
+    @Device.static_routes.push "#{@Device.trac["routing_instance_type"]}#{@Device.trac["vrf_rd_current"]}#{@Device.trac["static_routes_expanded"]}"
+
+    @Device.trac["static_routes_expanded"]  = "" 
+  end
+  @Device.trac["indent_routing_instance"] = 1  if @Device.line =~ /routing-instances {/
+  
+  if @Device.trac["indent_routing_instance"] > 0
+   juniper_indent_c_tags("indent_static_routes")
+   juniper_indent_c_tags("indent_static_routes_expanded")
+  
+   @Device.trac["indent_static_routes"] = 1  if @Device.line =~ /static {/
+   
+   #print "#{@Device.hostname} [line #{@Device.trac["line_number"]}]"
+   #puts "indent_routing_instance:#{@Device.trac["indent_routing_instance"]} : #{@Device.trac["group_current"]} #{@Device.line}"
+   if @Device.line =~ /\sinstance-type\s(vrf);/
+     @Device.trac["routing_instance_type"] = "#{$1} "
+   end
+   if @Device.line =~ /route-distinguisher (\d+:\d+);/
+     @Device.trac["vrf_rd_current"] = "#{$1} "
+   end
+
+   if @Device.trac["indent_static_routes"] > 0 
+     juniper_indent_c_tags("indent_static_routes_expanded")
+     
+     #route 172.19.80.0/22 next-hop 172.28.35.178;
+     if @Device.line =~ /route\s(\d+\.\d+\.\d+\.\d+\/\d+)\snext-hop\s(.*);/
+         @Device.static_routes.push "#{@Device.trac["routing_instance_type"]}#{@Device.trac["vrf_rd_current"]}#{$1} #{$2}"         
+     end
+     
+     @Device.trac["indent_static_routes_expanded"] = 1  if @Device.line =~ /route.*{/
+       
+     if @Device.trac["indent_static_routes_expanded"] > 0
+       if @Device.line =~ /route\s(\d+\.\d+\.\d+\.\d+\/\d+)\s{/
+          @Device.trac["static_routes_expanded"] = $1
+       end
+       if @Device.line =~ /\snext-hop\s(\d+\.\d+\.\d+\.\d+);/
+         @Device.trac["static_routes_expanded"] = @Device.trac["static_routes_expanded"] + " #{$1}"
+       end
+       if @Device.line =~ /\s(metric\s\d+);/
+         @Device.trac["static_routes_expanded"] = @Device.trac["static_routes_expanded"] + " #{$1}"
+       end
+       if @Device.line =~ /\s(preference\s\d+);/
+         @Device.trac["static_routes_expanded"] = @Device.trac["static_routes_expanded"] + " #{$1}"
+       end
+     end      
+   
+   end
+  
+  end
+end
 
 
 # handles all the indentation tracking so we know where we are
@@ -200,10 +267,6 @@ def juniper_interface_description
     if @Device.trac["physical_interface_indent"] > 0  && @Device.line =~ /description/
       @Device.trac["descr"] = @Device.line.gsub(/;/,'')
       @Interface.description =  @Device.line.gsub(/;/,'')
-      # no idea why this is here????
-      #@Interface.vrf = "yes" if @Device.trac["juniper vrf interface"].has_key? @Device.trac["interface"]
-      #@Interface.vrf = "yes" if @Device.trac["juniper vrf interface"].has_key? @Device.trac["interface"] + '.0'
-      @Interface.encapsulation = @Device.trac["encap"] if @Device.trac["encap"] != ""
     end
   end
 
