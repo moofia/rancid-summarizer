@@ -15,8 +15,8 @@ def getOptions
       ["--filter", Getopt::OPTIONAL],
       ["--rancid_dir", Getopt::OPTIONAL]
       )
-  rescue Getopt::Long::Error => e
-    puts "#{@script} -> error #{e.message}"  
+  rescue Getopt::Long::Error => error
+    puts "#{@script} -> error #{error.message}"  
     puts 
     help
   end
