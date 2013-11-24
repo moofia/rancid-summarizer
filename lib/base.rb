@@ -42,8 +42,8 @@ end
 def loadConfigs
   begin
     $config = YAML::load(File.read("#{scriptDirectory}/etc/rancid-summarizer.yaml"))
-  rescue => e
-    puts "#{@script} -> yaml error #{e.message} in etc/rancid-summarizer.yaml}"  
+  rescue => error
+    puts "#{@script} -> yaml error #{error.message} in etc/rancid-summarizer.yaml}"  
     exit 2
   end
 end
