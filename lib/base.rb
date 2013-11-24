@@ -2,7 +2,7 @@ def scriptDirectory
   File.expand_path($0).gsub(/\/bin\/.*/,'')
 end
 
-def getOptions
+def commandLineOption
   # options
   begin
     $opt = Getopt::Long.getopts(

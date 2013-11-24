@@ -25,7 +25,7 @@ trap("INT") do
   exit 2
 end
 
-getOptions
+commandLineOption
 loadConfigs
 postChecks
 

@@ -136,10 +136,16 @@ end
 # state of the physical interface of the unit, can be disabled seperately so we have
 # to keep track of both.
 def juniper_interface_state
-  @Device.trac["state"] = "enable" if  @Device.trac["physical_interface_indent"]  > 0 && @Device.line =~ /enable;/
-  @Device.trac["state"] = "disable" if  @Device.trac["physical_interface_indent"]  > 0 && @Device.line =~ /disable;/
-  @Device.trac["unit_state"] = "enable" if  @Device.trac["unit_interface_indent"] > 0 && @Device.line =~ /enable;/
-  @Device.trac["unit_state"] = "disable" if  @Device.trac["unit_interface_indent"] > 0 && @Device.line =~ /disable;/
+  if  @Device.trac["physical_interface_indent"]  > 0
+    @Device.trac["state"] = "enable" if @Device.line =~ /enable;/
+    @Device.trac["state"] = "disable" if @Device.line =~ /disable;/
+  end
+
+  if @Device.trac["unit_interface_indent"] > 0
+    @Device.trac["unit_state"] = "enable" if  @Device.line =~ /enable;/
+    @Device.trac["unit_state"] = "disable" if @Device.line =~ /disable;/
+  end
+
 end
 
 def juniper_vlan_tags
