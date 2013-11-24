@@ -68,7 +68,8 @@ class Device
     @trac["indent_static_routes_expanded"] = -1
     @trac["static_routes_expanded"] = ""
     @trac["routing_instance_type"] = ""
-    
+    @trac["cisco vrf name to rd"]     = {}
+    @trac["last vrf"] = ""
   end
 
 end # Class Device

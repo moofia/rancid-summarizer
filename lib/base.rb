@@ -93,6 +93,10 @@ def log(msg)
 end
 
 def processSummaries
+  
+  #debug @Device.trac["cisco vrf name to rd"]
+  
+  
   # process all the summaries
   @Device.interfaces.each do |interface|
     display = true

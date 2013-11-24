@@ -88,17 +88,36 @@ def cisco_interface
      @Interface.connected_routes.routes.push "#{$1}/#{$2}"
    end
    
-   # ip route 0.0.0.0 0.0.0.0 150.1.6.1
-   if @Device.line =~ /^ip route (\d+.\d+.\d+.\d+)\s(\d+.\d+.\d+.\d+)\s(.*)/
-     @Device.static_routes.push "#{$1}/#{$2} #{$3}"
-   end
-   
+
    # state
    if @Device.line =~ /\s+shutdown/
      @Interface.state = "shutdown"
    end
+ 
  end
 
+  # ip route 0.0.0.0 0.0.0.0 150.1.6.1
+  if not @Device.line =~ /vrf/ and @Device.line =~ /^ip route (\d+.\d+.\d+.\d+)\s(\d+.\d+.\d+.\d+)\s(.*)/
+    @Device.static_routes.push "#{$1}/#{$2} #{$3}"
+  end
+
+  if @Device.line =~ /^ip route vrf\s([^\s]+)\s(\d+.\d+.\d+.\d+)\s(\d+.\d+.\d+.\d+)\s(.*)/
+    @Device.static_routes.push "vrf #{@Device.trac["cisco vrf name to rd"][$1]} #{$2}/#{$3} #{$4}"
+  end
+  
+  # vrf to rd
+  if @Device.line =~ /^ip vrf\s(.*)/ && @Device.last == last_deliminator
+    @Device.trac["last vrf"] = $1
+  end
+  
+  if @Device.line =~ /\srd\s(\d+:\d+)/ and @Device.trac["last vrf"] != ""
+    @Device.trac["cisco vrf name to rd"][@Device.trac["last vrf"]] = $1
+  end
+  
+  if @Device.line == last_deliminator
+    @Device.trac["last vrf"] = ""
+  end
+  
  # end of inteface config, parse once we have the minium required info
  # TODO: good idea or bad idea to be ignoring shutdown interfaces
  if @Interface and @Interface.state != "shutdown" and @Device.line == last_deliminator and not $opt["ignore-interface-state"]
