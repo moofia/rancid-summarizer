@@ -85,7 +85,8 @@ def cisco_interface
    
    # ip address
    if @Device.line =~ / ip address (\d+.\d+.\d+.\d+)\s(\d+.\d+.\d+.\d+)(\sstandby)?/
-     @Interface.connected_routes.routes.push "#{$1}/#{$2}"
+     ip = IPAddress "#{$1}/#{$2}"
+     @Interface.connected_routes.routes.push "#{ip.address}/#{ip.prefix}"
    end
    
 
@@ -98,11 +99,13 @@ def cisco_interface
 
   # ip route 0.0.0.0 0.0.0.0 150.1.6.1
   if not @Device.line =~ /vrf/ and @Device.line =~ /^ip route (\d+.\d+.\d+.\d+)\s(\d+.\d+.\d+.\d+)\s(.*)/
-    @Device.static_routes.push "#{$1}/#{$2} #{$3}"
+    ip = IPAddress "#{$1}/#{$2}"
+    @Device.static_routes.push "#{ip.address}/#{ip.prefix} #{$3}"
   end
 
   if @Device.line =~ /^ip route vrf\s([^\s]+)\s(\d+.\d+.\d+.\d+)\s(\d+.\d+.\d+.\d+)\s(.*)/
-    @Device.static_routes.push "vrf #{@Device.trac["cisco vrf name to rd"][$1]} #{$2}/#{$3} #{$4}"
+    ip = IPAddress "#{$2}/#{$3}"    
+    @Device.static_routes.push "vrf #{@Device.trac["cisco vrf name to rd"][$1]} #{ip.address}/#{ip.prefix} #{$4}"
   end
   
   # vrf to rd
