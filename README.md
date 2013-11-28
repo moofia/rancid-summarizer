@@ -40,6 +40,12 @@ connected route;bb1.moofia.net;Ethernet0/0;150.1.6.254;255.255.255.0
 static route;bb1.moofia.net;0.0.0.0/0.0.0.0 150.1.6.1
 ```
 
+Currently collects the following
+
+* connected routes
+* static routes
+* static routes vrf
+ 
 ##TODO / BUGS
 
 * juniper : when a physical interface has a single unit of zero the unit will be referenced as the physical interface
