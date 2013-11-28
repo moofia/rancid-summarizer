@@ -11,9 +11,9 @@ This project aims to bridge the gap between provisioned networks and those confi
 
 ## installation
 
-gem install awesome_print
-gem install getopt
-gem install ipaddress
+* gem install awesome_print
+* gem install getopt
+* gem install ipaddress
 
 ##routes
 
