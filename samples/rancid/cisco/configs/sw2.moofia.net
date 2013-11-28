@@ -1,5 +1,9 @@
 !RANCID-CONTENT-TYPE: cisco
 !
+!Chassis type: AS2511-RJ - a 2500 router
+!CPU: 68030
+!
+!
 version 15.0
 no service pad
 service timestamps debug uptime

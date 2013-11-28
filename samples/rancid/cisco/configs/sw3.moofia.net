@@ -1,5 +1,9 @@
 !RANCID-CONTENT-TYPE: cisco
 !
+!Chassis type: AS2511-RJ - a 2500 router
+!CPU: 68030
+!
+!
 version 15.0
 service timestamps debug datetime msec
 service timestamps log datetime msec
@@ -122,33 +126,3 @@ line vty 0 4
  transport input all
 !
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

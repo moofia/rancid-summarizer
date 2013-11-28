@@ -1,5 +1,9 @@
 !RANCID-CONTENT-TYPE: cisco
 !
+!Chassis type: AS2511-RJ - a 2500 router
+!CPU: 68030
+!
+!
 version 15.2
 service timestamps debug datetime msec
 service timestamps log datetime msec
