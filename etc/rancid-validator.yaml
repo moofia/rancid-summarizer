@@ -1,13 +1,11 @@
 ---
-
-
 cisco:
   null0: unreachables
   
   # global commands
   # perl like regex
-  # true = commands that must be found
-  # false = commands that must not be found
+  # true = commands that must be on the device
+  # false = commands that must not be on the device
   # key will be used in the displayed output where _'s are changed to spaces
   global:
     "true":

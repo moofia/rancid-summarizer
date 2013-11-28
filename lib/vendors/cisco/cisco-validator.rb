@@ -7,17 +7,17 @@ end
 
 # collection of cisco configs for validation
 def cisco_validate
-  #validator_cisco_vty
+  validator_cisco_vty
   validator_cisco_generic
-  #cisco_validate_null0(line,last,trac,rancid_file)
+  validator_cisco_null0
   #cisco_validate_netflow_exporter(line,last,trac,rancid_file)
 end
 
 # process of cisco collected data for processing
 def validator_cisco_process
-  #validator_cisco_process_vty
+  validator_cisco_process_vty
   validator_cisco_process_generic
-  #validator_cisco_process_null0(trac,rancid_file)
+  validator_cisco_process_null0
   #validator_cisco_process_netflow_exporter(trac,rancid_file)
 end
 
@@ -43,10 +43,10 @@ end
 
 def validator_cisco_process_vty
   if @Device.trac.has_key? "vty" and @Device.trac["vty"].has_key? "line"
-    validate_logger("line","insecure \'#{trac["vty"]["line"]}\'")
+    validate_logger("security","insecure \'#{trac["vty"]["line"]}\'")
   end
   if @Device.trac.has_key? "vty" and not @Device.trac["vty"].has_key? "acl"
-    validate_logger("line","no vty acl")
+    validate_logger("securityg","no vty acl")
   end
 end
 
@@ -85,30 +85,33 @@ end
 #interface Null0
 # no ip unreachables
 #!
-def cisco_validate_null0(line,last,trac,rancid_file)
+def validator_cisco_null0
   if $validator["cisco"].has_key? "null0" and $validator["cisco"]["null0"] == "unreachables"
   key = "null0"
-  if line =~ /^interface Null0/ and last =~ /^!/
-    trac[key] = Hash.new unless trac[key].class == Hash     
-    trac[key]["start"] = 1
+  if @Device.line =~ /^interface Null0/ and @Device.last =~ /^!/
+    @Device.trac[key] = Hash.new unless @Device.trac[key].class == Hash     
+    @Device.trac[key]["start"] = 1
   end
   
-  if trac.has_key? key and trac[key]["start"] > 0
-    if line =~ /\sno ip unreachables/
-      trac[key]["unreachables"] = true
+  if @Device.trac.has_key? key and @Device.trac[key]["start"] > 0
+    if @Device.line =~ /\sno ip unreachables/
+      @Device.trac[key]["unreachables"] = true
     end
   end
   end
 end
 
-def validator_cisco_process_null0(trac,rancid_file)
+def validator_cisco_process_null0
   key = "null0"  
-  if trac.has_key? "generic"
-    device = device_name(rancid_file)
-    if trac["generic"]["chassis"] =~ /router/ and trac["generic"]["chassis"] !~ /Cat6k|WS-C|MSFC/
-      if trac.has_key? key and not trac[key].has_key? "unreachables"
-        validate_logger(device,"security","missing \'no ip unreachables\' on Null0")
+  if @Device.trac.has_key? "generic"
+    if @Device.trac["generic"]["chassis"] =~ /router/ and @Device.trac["generic"]["chassis"] !~ /Cat6k|WS-C|MSFC/
+      if @Device.trac.has_key? key and not @Device.trac[key].has_key? "unreachables"
+        validate_logger("security","missing \'no ip unreachables\' on interface Null0")
       end
+      if not @Device.trac.has_key? key
+        validate_logger("security","missing \'no ip unreachables\' on interface Null0")
+      end
+      
     end  
   end
 end
