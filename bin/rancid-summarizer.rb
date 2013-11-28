@@ -15,6 +15,7 @@ require "#{script_dir}/lib/interfaces"
 require "#{script_dir}/lib/vendors/alcatel/alcatel-interfaces"
 require "#{script_dir}/lib/vendors/cisco/cisco-interfaces"
 require "#{script_dir}/lib/vendors/juniper/juniper-interfaces"
+require "#{script_dir}/lib/vendors/juniper/juniper-routing"
 require "#{script_dir}/lib/vendors/acme/acme-policies"
 
 @script = $0.split('/').last
@@ -77,12 +78,13 @@ Dir.foreach(rancid_dir) do |directory|
             line.chomp!
             line.gsub!(/\s+$/,'')
             @Device.line = line
+            # FIXME: refactor name of parse_interface to parse_configuration
             parse_interface          
             @Device.last = @Device.line
-          rescue ArgumentError => e
+          rescue ArgumentError => error
             if $opt["debug"]
               puts "line --> #{line}"
-              puts "error: #{e}"
+              puts "error: #{error}"
             end
           end
           @Device.trac["line_number"] = @Device.trac["line_number"] + 1;

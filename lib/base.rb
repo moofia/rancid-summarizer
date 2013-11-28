@@ -116,6 +116,7 @@ def processSummaries
   
   end
   @Device.summarizeStaticRoutes if $opt["mode"] == "routes"
+  processVpls if $opt["mode"] == "vpls"
   
   #debug @Device.groups
 end
@@ -139,5 +140,11 @@ def display_warnings
     @warnings.each do |warning|
       $stderr.puts "#{@script} -> #{warning}"
     end
+  end
+end
+
+def processVpls
+  @Device.vpls.each do |summary|
+    puts "#{@Device.hostname};#{summary}"
   end
 end

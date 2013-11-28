@@ -1,13 +1,14 @@
 # Device class
 class Device
-  attr_writer :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups
-  attr_reader :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups
+  attr_writer :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups, :vpls
+  attr_reader :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups, :vpls
   
   def initialize(hostname, vendor)
     @interfaces = []
     @static_routes = []
     @trac = {}
     @groups = {}
+    @vpls = []
     @hostname = hostnameStripDomain(hostname)
     @vendor = vendor
     tracDefaults

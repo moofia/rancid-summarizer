@@ -7,6 +7,7 @@ def parse_interface
     cisco_interface if $opt["mode"] =~ /routes/
   when "juniper"
     juniper_interface if $opt["mode"] =~ /routes/
+    juniper_routing   if $opt["mode"] =~ /vpls/
   when "alcatel"
     alcatel_interface if $opt["mode"] =~ /routes/
   when "acme"
