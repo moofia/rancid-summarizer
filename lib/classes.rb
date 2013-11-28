@@ -1,7 +1,7 @@
 # Device class
 class Device
-  attr_writer :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups, :vpls
-  attr_reader :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups, :vpls
+  attr_writer :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups, :vpls, :validations
+  attr_reader :hostname, :vendor, :interfaces, :trac, :line, :last, :rancid_file, :static_routes, :groups, :vpls, :validations
   
   def initialize(hostname, vendor)
     @interfaces = []
@@ -9,6 +9,7 @@ class Device
     @trac = {}
     @groups = {}
     @vpls = []
+    @validations = []
     @hostname = hostnameStripDomain(hostname)
     @vendor = vendor
     tracDefaults

@@ -72,7 +72,7 @@ puts <<HELP
   usage: #{@script} --mode [descriptions]--filter [regex] --debug
 
   --filter [regex]           regex filter (optional, defaults to everything)
-  --mode                     routes, vpls, vlan-tagging, validations
+  --mode                     routes, vpls, vlan-tagging, validator
   --debug                    extra log messages for debugging
   --debug2                   extra extra log messages for debugging (can be a bit hairy)
   --rancid_dir               directory of where rancid data is stored (can only be used in validation mode)
@@ -125,7 +125,7 @@ def processSummaries
   @Device.summarizeStaticRoutes if $opt["mode"] == "routes"
   processVpls if $opt["mode"] == "vpls"
   
-  cisco_process if $opt["mode"] == "validator"
+  validator_cisco_process if $opt["mode"] == "validator"
   #debug @Device.groups
 end
 

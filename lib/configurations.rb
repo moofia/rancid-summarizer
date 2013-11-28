@@ -3,7 +3,7 @@ def parse_configuration
   case @Device.vendor
   when "cisco"
     cisco_interface if $opt["mode"] =~ /routes|vlan-tagging/
-    cisco_validate  if $opt["mode"] =~ /validater/
+    cisco_validate  if $opt["mode"] =~ /validator/
   when "huawei"
     cisco_interface if $opt["mode"] =~ /routes/
   when "juniper"

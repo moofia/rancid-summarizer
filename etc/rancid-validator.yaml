@@ -2,22 +2,29 @@
 
 
 cisco:
- null0: unreachables
- "true":
-   tacacs_failure_user: '^username admin\s|^!?username noradius'
-   ip_cef: '^ip cef'
-   tacacs_source_lo0: '^ip tacacs source-interface Loopback0|tacacs source-interface Loopback0'
-   service_password_encryption: '^service password-encryption'
-   no_ip_source-route: '^no ip source-route'
-   config_register_0x2102: '^config-register 0x2102'
-   ntp_server: '^ntp server'
-   logging_source_interface_lo0: '^logging source-interface Loopback0'
-   logging_server: '^logging\s\d+\.\d+\.\d+\.\d+'
-   no_cdp_run: '^no cdp run'
-   aaa_authorization_config-commands: '^aaa authorization config-commands'
- "false":
-   http_server: '^ip http'
-   tftp_server: '^tftp-server'
+  null0: unreachables
+  
+  # global commands
+  # perl like regex
+  # true = commands that must be found
+  # false = commands that must not be found
+  # key will be used in the displayed output where _'s are changed to spaces
+  global:
+    "true":
+      tacacs_failure_user: '^username admin\s|^username notacacs'
+      ip_cef: '^ip cef'
+      tacacs_source_lo0: '^ip tacacs source-interface Loopback0|tacacs source-interface Loopback0'
+      service_password_encryption: '^service password-encryption'
+      no_ip_source-route: '^no ip source-route'
+      config_register_0x2102: '^config-register 0x2102'
+      ntp_server: '^ntp server'
+      logging_source_interface_lo0: '^logging source-interface Loopback0'
+      logging_server: '^logging\s\d+\.\d+\.\d+\.\d+'
+      no_cdp_run: '^no cdp run'
+      aaa_authorization_config-commands: '^aaa authorization config-commands'
+    "false":
+      http_server: '^ip http'
+      tftp_server: '^tftp-server'
    
 vty:
   acls_allowd: '^host_protect$|^management-limit$'
