@@ -9,6 +9,12 @@ Our primary focus on was on provisioning systems for the network.
 
 This project aims to bridge the gap between provisioned networks and those configured manually enabling systems that rely on network data to be automated.
 
+## installation
+
+gem install awesome_print
+gem install getopt
+gem install ipaddress
+
 ##routes
 
 Outputs all connected and static routes
