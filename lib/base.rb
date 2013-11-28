@@ -46,6 +46,12 @@ def loadConfigs
     puts "#{@script} -> yaml error #{error.message} in etc/rancid-summarizer.yaml}"  
     exit 2
   end
+  begin
+    $validator = YAML::load(File.read("#{scriptDirectory}/etc/rancid-validator.yaml"))
+  rescue => error
+    puts "#{@script} -> yaml error #{error.message} in etc/rancid-validator.yaml}"  
+    exit 2
+  end
 end
 
 def barf (msg)
@@ -66,7 +72,7 @@ puts <<HELP
   usage: #{@script} --mode [descriptions]--filter [regex] --debug
 
   --filter [regex]           regex filter (optional, defaults to everything)
-  --mode                     routes, vpls, vlan-tagging
+  --mode                     routes, vpls, vlan-tagging, validations
   --debug                    extra log messages for debugging
   --debug2                   extra extra log messages for debugging (can be a bit hairy)
   --rancid_dir               directory of where rancid data is stored (can only be used in validation mode)
@@ -119,6 +125,7 @@ def processSummaries
   @Device.summarizeStaticRoutes if $opt["mode"] == "routes"
   processVpls if $opt["mode"] == "vpls"
   
+  cisco_process if $opt["mode"] == "validator"
   #debug @Device.groups
 end
 
