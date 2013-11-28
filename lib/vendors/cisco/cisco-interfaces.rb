@@ -4,7 +4,6 @@ def cisco_interface
  last_deliminator = '!' if @Device.vendor =~ /cisco/
  last_deliminator = '#' if @Device.vendor =~ /huawei/
  # controller name
- 
  if @Device.line =~ /^controller\s(.*)/ && @Device.last == last_deliminator
    i = $1   
    @Controller = Cisco_Controller.new i

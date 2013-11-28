@@ -2,11 +2,11 @@
 def parse_configuration
   case @Device.vendor
   when "cisco"
-    cisco_interface if $opt["mode"] =~ /routes/
+    cisco_interface if $opt["mode"] =~ /routes|vlan-tagging/
   when "huawei"
     cisco_interface if $opt["mode"] =~ /routes/
   when "juniper"
-    juniper_interface if $opt["mode"] =~ /routes/
+    juniper_interface if $opt["mode"] =~ /routes|vlan-tagging/
     juniper_routing   if $opt["mode"] =~ /vpls/
   when "alcatel"
     alcatel_interface if $opt["mode"] =~ /routes/

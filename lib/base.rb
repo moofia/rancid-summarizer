@@ -66,7 +66,7 @@ puts <<HELP
   usage: #{@script} --mode [descriptions]--filter [regex] --debug
 
   --filter [regex]           regex filter (optional, defaults to everything)
-  --mode                     descriptions
+  --mode                     routes, vpls, vlan-tagging
   --debug                    extra log messages for debugging
   --debug2                   extra extra log messages for debugging (can be a bit hairy)
   --rancid_dir               directory of where rancid data is stored (can only be used in validation mode)
@@ -111,6 +111,7 @@ def processSummaries
     
     if display
       interface.connected_routes.to_routes_summary if $opt["mode"] == "routes"
+      interface.to_vlan_tagging_summary            if $opt["mode"] == "vlan-tagging"
       #puts "#{interface.name} --> #{interface.description}"
     end
   

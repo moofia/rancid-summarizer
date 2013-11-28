@@ -216,34 +216,14 @@ class Interface
      @vlan_tags = new_tags
   end
   
-  def to_vlan_tags_summary
-     if @is_valid_description
-       @config_summary_done = true
-
-       # incase no instance variable is set we set it to something that we can catch, also to ensure column count
-       # in the summary is always intact
-       self.instance_variables.each do |i|
-         # descriptions_extra can be empty
-         next if i =~ /descriptions_extra/
-         self.instance_variable_set i,"xxxxx" if ((self.instance_variable_get i) == "")
-       end  
-
-       if @name !~ /^lo/i and @vlan_tags =~ /\d+/
-         if @mnemonic != "unused"
-           inner, outer = @vlan_tags.split(/,/)
-           puts "#{@DeviceName};#{@name};#{@mnemonic};#{inner};#{outer}"
-         end
-       end
+  def to_vlan_tagging_summary
+    if @vlan_tags =~ /\d+/
+      inner, outer = @vlan_tags.split(/,/)
+      puts "vlan tagging;#{@DeviceName};#{@name};#{inner};#{outer}"
      end
   end  
    
   def to_descriptions_summary
-  end
-  
-  def to_routes_summary
-      if @address =~ /\d+\.\d+\.\d+\.\d+/ && @netmask =~ /\d+/
-        #puts "to_routes_summary;#{@DeviceName};#{@name};#{@address};#{@netmask}"
-      end
   end
   
  
