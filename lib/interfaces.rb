@@ -1,5 +1,5 @@
 
-def parse_interface
+def parse_configuration
   case @Device.vendor
   when "cisco"
     cisco_interface if $opt["mode"] =~ /routes/

@@ -78,8 +78,8 @@ Dir.foreach(rancid_dir) do |directory|
             line.chomp!
             line.gsub!(/\s+$/,'')
             @Device.line = line
-            # FIXME: refactor name of parse_interface to parse_configuration
-            parse_interface          
+            # FIXME: refactor name of parse_configuration to parse_configuration
+            parse_configuration          
             @Device.last = @Device.line
           rescue ArgumentError => error
             if $opt["debug"]
