@@ -11,7 +11,7 @@ require 'ipaddress'
 script_dir = File.expand_path($0).gsub(/\/bin\/.*/,'')
 require "#{script_dir}/lib/base"
 require "#{script_dir}/lib/classes"
-require "#{script_dir}/lib/interfaces"
+require "#{script_dir}/lib/configurations"
 require "#{script_dir}/lib/vendors/alcatel/alcatel-interfaces"
 require "#{script_dir}/lib/vendors/cisco/cisco-interfaces"
 require "#{script_dir}/lib/vendors/juniper/juniper-interfaces"
